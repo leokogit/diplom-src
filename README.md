@@ -16,7 +16,7 @@
 
 
 Регистрация runner:    
-``` sudo gitlab-runner register --url http://gitlab.ldevops.ru/ --registration-token $REGISTRATION_TOKEN ```    
+``` sudo gitlab-runner register --url http://gitlab.domain.ru/ --registration-token $REGISTRATION_TOKEN ```    
 
 пример .gitlab-ci.yml file (поменять путь до проекта, путь до папки на веб сервере куда будет копироваться / обновляться код и свой домен):     
 ```
