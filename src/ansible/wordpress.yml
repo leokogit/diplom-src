@@ -1,0 +1,7 @@
+  - name: Installation nginx,php-fpm,wordpress and setup
+    hosts: app.yourdomain
+    become: yes
+    become_user: root
+    remote_user: ubuntu
+    roles:
+      - wordpress

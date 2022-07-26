@@ -1,0 +1,125 @@
+---
+# Install Nginx
+
+- name: Update apt cache
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: Install nginx
+  apt:
+    name: nginx
+    state: latest
+    update_cache: yes
+
+- name: Start nginx
+  service:
+    name: nginx
+    state: started
+- name: Disable default site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+- name: Update nginx confs for WordPress + PHP
+  template:
+    src: default.conf
+    dest: /etc/nginx/sites-available/{{ server_hostname }}
+    owner: www-data
+    group: www-data
+    mode: 0644
+
+- name: Enable site
+  file:
+    src: /etc/nginx/sites-available/{{ server_hostname }}
+    dest: /etc/nginx/sites-enabled/{{ server_hostname }}
+    owner: www-data
+    group: www-data
+    state: link
+  notify:
+    - restart nginx
+# Install PHP7.4 and php7.4-fpm
+- name: install software-properties-common
+  apt:
+    name: software-properties-common
+- name: "Repo PHP 7.4"
+  apt_repository: repo="ppa:ondrej/php"
+- name: "Updating the repo"
+  apt: update_cache=yes
+# Update apt cache.
+- name: Update apt cache
+  apt:
+    update_cache: true
+  register: task_result
+  until: task_result is success
+  retries: 3
+  delay: 10
+- name: Installation PHP 7.4
+  apt:
+    name: php7.4
+    state: present
+# Install PHP7 packages.
+- name: Install php packages
+  apt:
+    name: "{{ apt_php_packages }}"
+  register: task_result
+  until: task_result is success
+  retries: 3
+  delay: 10
+  when: apt_php_packages is defined
+  notify:
+    - restart php-fpm
+
+- name: Start php-fpm
+  service:
+    name: "php{{ apt_php_version }}-fpm"
+    state: started
+    enabled: yes
+# Configure php7.4-fpm. change listen socket
+# Install memcached server
+- name: install memcached server
+  apt:
+    pkg: memcached
+
+# Install Wordpress and configure
+- name: download WordPress
+  get_url:
+    url: "{{ download_url }}"
+    dest: "/tmp/latest.tar.gz"
+
+- name: creating directory for WordPress
+  file:
+    path: "{{ wpdir }}/{{ server_hostname }}"
+    state: "directory"
+    owner: "www-data"
+    group: "www-data"
+
+- name: unpack WordPress installation
+  shell: "tar xvzf /tmp/latest.tar.gz -C {{ wpdir }}/{{ server_hostname }} --strip-components 1 && chown -R www-data:www-data {{ wpdir }}/{{ server_hostname }}"
+
+- name: Fetch random salts for WordPress config
+  local_action: command curl https://api.wordpress.org/secret-key/1.1/salt/
+  register: "wp_salt"
+  become: no
+- name: Copy WordPress config file
+  template: src=wp-config.php dest={{ wpdir }}/{{ server_hostname }}
+- name: Start php-fpm Service
+  service: name=php{{ apt_php_version }}-fpm state=started enabled=yes
+# Install WP-cli
+- name: Install WP-CLI
+  get_url:
+    url: "{{ wp_cli_phar_url }}"
+    dest: "{{ wp_cli_bin_path }}"
+    force: true
+    owner: root
+    group: root
+    mode: 0755
+  tags:
+    - wp-cli
+
+- name: Install WP-CLI Packages
+  command: "{{ wp_cli_bin_command }} package install {{ item }}"
+  register: command_result
+  changed_when: "'Installing package' in command_result.stdout"
+  when: item is defined
+  with_items:
+    - "{{ wp_cli_packages }}"
+  tags:
+    - wp_packages

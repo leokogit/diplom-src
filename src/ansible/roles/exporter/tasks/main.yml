@@ -1,0 +1,74 @@
+---
+- name:  Add group
+  group:
+    name: "{{ exporter_user }}"
+    state: present
+
+- name: Add user
+  user:
+    name: "{{ exporter_user }}"
+    comment: Node Exporter User
+    group: "{{ exporter_group }}"
+    create_home: no
+    shell: /bin/false
+    state: present
+
+- name: download prometheus node exporter binary locally
+  get_url:
+    url: "{{ exporter_url }}"
+    dest: "/tmp/{{ exporter_release_name }}.tar.gz"
+  
+- name: transfer local node exporter binary
+  copy: 
+    src: "/tmp/{{ exporter_release_name }}.tar.gz"
+    dest: "{{ bin_path }}/{{ exporter_release_name }}.tar.gz"
+    remote_src: yes
+    owner: "{{ exporter_user }}"
+    group: "{{ exporter_group }}"
+    mode: '0755'
+
+- name: unarchive binary tarball
+  unarchive:
+    copy: no
+    src: "{{ bin_path }}/{{ exporter_release_name }}.tar.gz"
+    dest: "{{ bin_path }}"
+    creates: "{{ bin_path }}/{{ exporter_release_name }}/node_exporter"
+  register: exporter_updated
+  notify:
+    - restart node exporter
+
+- name: update group and owner for files
+  file:
+    path: "{{ bin_path }}/{{ exporter_release_name }}"
+    state: directory
+    recurse: yes
+    owner: "{{ exporter_user }}"
+    group: "{{ exporter_group }}"
+    mode: '0755'
+  when: exporter_updated is changed
+
+- name: create symlink to the current release
+  file:
+    src: "{{ bin_path }}/{{ exporter_release_name }}"
+    path: /root/node_exporter_current
+    state: link
+
+- name: create systemd service unit
+  template:
+    src: etc/systemd/system/exporter.service.j2
+    dest: /etc/systemd/system/exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  when: service_mgr | default(ansible_service_mgr) == 'systemd'
+  notify:
+    - reenable node exporter service
+    - restart node exporter
+
+- meta: flush_handlers
+
+- name: ensure prometheus node exporter service is enabled and started
+  service:
+    name: exporter
+    state: restarted
+    enabled: yes

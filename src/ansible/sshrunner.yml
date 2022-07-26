@@ -1,0 +1,68 @@
+---
+# Create user runner on gitlab server and app server, generate ssh cert on runner and copy id_rsa to app server (deploy) and gitlab server
+
+# Create user runner and add to group www-data for deploying
+- name: "Create user account gitlab-runner on runner"
+  hosts: runner.yourdomain
+  become: yes
+  become_user: root
+  remote_user: ubuntu
+  tasks:
+   - name: "Create user for runner server"
+     user:
+       name: gitlab-runner
+       shell: /bin/bash
+  tags:
+    - app_user_runner
+
+- name: "Create user account gitlab-runner on app server and add user to groups"
+  hosts: app.yourdomain
+  become: yes
+  become_user: root
+  remote_user: ubuntu
+  tasks:
+   - name: "Create user for app server"
+     user:
+       name: gitlab-runner
+       shell: /bin/bash
+       groups: "www-data"
+  tags:
+    - app_user_runner
+
+- name: generate SSH key
+  hosts: runner.yourdomain
+  become: yes
+  become_user: root
+  remote_user: gitlab-runner
+  vars:
+    key_name: id_rsa
+  tasks:
+    - name: Creates directory .ssh
+      file:
+        path: /home/gitlab-runner/.ssh
+        state: directory
+        owner: gitlab-runner
+    - name: Creates config ssh stricthostkeycheck
+      file:
+        path: /home/gitlab-runner/.ssh/config
+        state: touch
+        owner: gitlab-runner
+        force: no
+        mode: 0400
+    - name: copy content to config
+      shell: echo "Host *" > /home/gitlab-runner/.ssh/config && echo " StrictHostKeyChecking no" >> /home/gitlab-runner/.ssh/config
+
+    - name: generate SSH key "{{ key_name }}"
+      openssh_keypair:
+        path: "/home/gitlab-runner/.ssh/{{ key_name }}"
+        type: rsa
+        size: 4096
+        state: present
+        force: no
+        owner: gitlab-runner
+      register: ssh_keys
+    - name: Install SSH Public Key in app server
+      authorized_key:
+        user: gitlab-runner
+        key: "{{ ssh_keys.public_key }}"
+      delegate_to: app.yourdomain

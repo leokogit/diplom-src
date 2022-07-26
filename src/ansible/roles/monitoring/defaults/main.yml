@@ -1,0 +1,3 @@
+prometheus_url: prometheus.yourdomain
+grafana_url: grafana.yourdomain
+alertmanager_url: alertmanager.yourdomain

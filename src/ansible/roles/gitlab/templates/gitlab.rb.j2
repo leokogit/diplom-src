@@ -1,0 +1,27 @@
+#Running GitLab in a memory-constrained environment
+external_url "{{ git_url }}"
+letsencrypt['enable'] = false
+puma['worker_processes'] = 0
+postgresql['shared_buffers'] = "256MB"
+sidekiq['max_concurrency'] = 10
+
+prometheus_monitoring['enable'] = false
+
+gitlab_rails['env'] = {
+  'MALLOC_CONF' => 'dirty_decay_ms:1000,muzzy_decay_ms:1000'
+}
+
+gitaly['concurrency'] = [
+  {
+    'rpc' => "/gitaly.SmartHTTPService/PostReceivePack",
+    'max_per_repo' => 10
+  }, {
+    'rpc' => "/gitaly.SSHService/SSHUploadPack",
+    'max_per_repo' => 4
+  }
+]
+gitaly['env'] = {
+  'LD_PRELOAD' => '/opt/gitlab/embedded/lib/libjemalloc.so',
+  'MALLOC_CONF' => 'dirty_decay_ms:1000,muzzy_decay_ms:1000',
+  'GITALY_COMMAND_SPAWN_MAX_PARALLEL' => '2'
+}

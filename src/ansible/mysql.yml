@@ -1,0 +1,23 @@
+---
+- name: Setup Master
+  hosts: db01.yourdomain
+  become: yes
+  become_user: root
+  remote_user: ubuntu
+  roles:
+    - mysql
+  vars:
+      mysql_repl_role: primary
+      mysql_server_id: 1
+- name: Setup Slave and start replication
+  hosts: db02.yourdomain
+  roles:
+    - mysql
+  become: yes
+  become_user: root
+  remote_user: ubuntu
+  vars:
+      mysql_users: none
+      mysql_repl_role: replica
+      mysql_repl_primary: db01.yourdomain
+      mysql_server_id: 2

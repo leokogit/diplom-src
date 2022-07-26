@@ -1,0 +1,7 @@
+  - name: Installation gitlab CE
+    hosts: gitlab.yourdomain
+    become: yes
+    become_user: root
+    remote_user: ubuntu
+    roles:
+      - gitlab

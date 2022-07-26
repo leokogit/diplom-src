@@ -1,0 +1,103 @@
+---
+nginx_revproxy_sites:
+  yourdomain:
+    domains:
+      - yourdomain
+      - www.yourdomain
+    upstreams:
+      - {backend_address: 192.168.1.10, backend_port: 80}
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: "yourmail"
+    conn_upgrade: true
+  app.yourdomain:
+    domains:
+      - app.yourdomain
+    upstreams:
+      - {backend_address: 192.168.1.10, backend_port: 80}
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: "yourmail"
+    conn_upgrade: true
+
+  db01.yourdomain:
+    domains:
+      - db01.yourdomain
+    upstreams:
+      - {backend_address: 192.168.1.3, backend_port: 80}
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: "yourmail"
+    conn_upgrade: true
+  db02.yourdomain:
+    domains:
+      - db02.yourdomain
+    upstreams:
+      - {backend_address: 192.168.1.4, backend_port: 80}
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: "yourmail"
+    conn_upgrade: true
+
+  gitlab.yourdomain:
+    domains:
+      - gitlab.yourdomain
+    upstreams:
+      - {backend_address: 192.168.1.5, backend_port: 80}
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: "yourmail"
+    conn_upgrade: true
+  runner.yourdomain:
+    domains:
+      - runner.yourdomain
+    upstreams:
+      - {backend_address: 192.168.1.6, backend_port: 80}
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: "yourmail"
+    conn_upgrade: true
+#   monitoring.yourdomain:
+#     domains:
+#       - monitoring.yourdomain
+#     upstreams:
+#       - {backend_address: 192.168.1.7, backend_port: 80}
+#     ssl: true
+#     letsencrypt: true
+#     letsencrypt_email: "yourmail"
+#     conn_upgrade: true
+  grafana.yourdomain:
+    domains:
+      - grafana.yourdomain
+    upstreams:
+      - {backend_address: 192.168.1.7, backend_port: 3000}
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: "yourmail"
+    conn_upgrade: true
+  prometheus.yourdomain:
+    domains:
+      - prometheus.yourdomain
+    upstreams:
+      - {backend_address: 192.168.1.7, backend_port: 9090}
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: "yourmail"
+    conn_upgrade: true
+  alertmanager.yourdomain:
+    domains:
+      - alertmanager.yourdomain
+    upstreams:
+      - {backend_address: 192.168.1.7, backend_port: 9093}
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: "yourmail"
+    conn_upgrade: true
+
+nginx_revproxy_certbot_auto: false
+
+# Remove WebRoot Sites
+nginx_revproxy_remove_webroot_sites: true
+
+# De-activate Sites
+nginx_revproxy_de_activate_sites: true

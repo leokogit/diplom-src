@@ -1,0 +1,63 @@
+auto_up_disable: true
+server_hostname: app.yourdomain
+server_hostname_www: www.{{ server_hostname }}
+nginx_port: 80
+
+#PHP Settings
+debian_php7_apt_repo: "http://packages.dotdeb.org"
+debian_php7_apt_key: "https://www.dotdeb.org/dotdeb.gpg"
+ubuntu_php7_ppa_repo: "ppa:ondrej/php"
+
+# A switch for enable or disable the third-party repository.
+#
+#  true: use the official repository.
+#  false: use the third-party repository.
+apt_php_third_party_repo: true
+
+apt_php_version: "7.4"
+
+apt_php_packages:
+  - php{{ apt_php_version }}-mysql
+  - php{{ apt_php_version }}-curl
+  - php{{ apt_php_version }}-json
+  - php{{ apt_php_version }}-cgi
+  - php{{ apt_php_version }}-xsl
+  - php{{ apt_php_version }}-gd
+  - php{{ apt_php_version }}-mbstring
+  - php{{ apt_php_version }}-zip
+  - php{{ apt_php_version }}-xml
+  - php{{ apt_php_version }}-cli
+  - php{{ apt_php_version }}-common
+  - php{{ apt_php_version }}-fpm
+  - php{{ apt_php_version }}-memcache
+  - php{{ apt_php_version }}-memcached
+  - php{{ apt_php_version }}-intl
+  - php-imagick
+  #- php{{ apt_php_version }}-pear
+
+# WordPress  settings
+wpdir: "/var/www"
+download_url: "http://wordpress.org/latest.tar.gz"
+# WordPress database settings
+wp_db_name: wordpress
+wp_db_user: wordpress
+wp_db_password: wordpress
+
+mysql_port: 3306
+mysql_root_password: root
+
+# WordPress Version
+wp_version: 4.7.5
+wp_sha1sum: fbe0ee1d9010265be200fe50b86f341587187302
+
+#Define Core Update Level
+#true  = Development, minor, and major updates are all enabled
+#false = Development, minor, and major updates are all disabled
+#minor = Minor updates are enabled, development, and major updates are disabled
+core_update_level: true
+
+# WordPress wp-cli
+wp_cli_phar_url: https://raw.github.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+wp_cli_bin_path: "/usr/bin/{{ wp_cli_bin_command }}"
+wp_cli_bin_command: wp
+wp_cli_packages: []

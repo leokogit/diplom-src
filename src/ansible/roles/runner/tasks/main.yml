@@ -1,0 +1,21 @@
+- name: Download the binary for your system
+  shell: 'curl -L --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64'
+- name: Give it permission to execute
+  shell: chmod +x /usr/local/bin/gitlab-runner
+- name: Install runner as a service
+  shell: gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+- name: Start runner
+  shell: gitlab-runner start
+
+#- name: Register runner
+#  shell: gitlab-runner register
+#         --non-interactive
+#         --url '{{ url }}'
+#         --registration-token '{{ token }}'
+#         --executor "shell"
+#         --description "shell-runner"
+#         --tag-list "shell,wordpress"
+#         --run-untagged="false"
+#         --locked="false"
+#         --access-level="not_protected"
+

@@ -1,0 +1,25 @@
+---
+
+- name: start nginx
+  service:
+    name: nginx
+    state: started
+
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+- name: Restart Iptables
+  service:
+    name: iptables
+    state: restarted
+- name: restart php-fpm
+  service:
+    name: "php{{ apt_php_version }}-fpm"
+    state: restarted
+    enabled: yes

@@ -1,0 +1,7 @@
+  - name: Install and configure runner
+    hosts: runner.yourdomain
+    become: yes
+    become_user: root
+    remote_user: gitlab-runner
+    roles:
+      - runner

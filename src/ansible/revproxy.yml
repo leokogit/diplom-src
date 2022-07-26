@@ -1,0 +1,7 @@
+  - name: Installation nginx and setup reverse proxy with TLS
+    hosts: yourdomain
+    become: yes
+    become_user: root
+    remote_user: ubuntu
+    roles:
+      - revproxy

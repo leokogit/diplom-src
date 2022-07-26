@@ -1,0 +1,74 @@
+---
+- name: packages for gitlab ce
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - openssh-server
+    - ca-certificates
+    - tzdata
+
+# Install Gitlab CE
+- name: Check if GitLab configuration file already exists.
+  stat: path=/etc/gitlab/gitlab.rb
+  register: gitlab_config_file
+
+- name: (GITLAB-CE) Check if GitLab-CE is already installed
+  stat:
+    path: /etc/gitlab
+  register: gitlab
+
+- name: (GITLAB-CE) Download GitLab-CE Deb script
+  get_url:
+    url: https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh
+    dest: /tmp/gitlab-ce.deb.sh
+  when: not gitlab.stat.exists
+
+- name: (GITLAB-CE) Execute GitLab-CE Deb script
+  command: /bin/bash /tmp/gitlab-ce.deb.sh
+  when: not gitlab.stat.exists
+
+- name: (GITLAB-CE) Install GitLab Community Edition
+  package:
+    name: gitlab-ce
+    state: latest
+  register: gitlabupdate
+  when: not gitlab.stat.exists
+
+- name: reconfiguring gitlab-ce (first-time)
+  command: gitlab-ctl reconfigure
+
+- name: (GITLAB-CE) Restart GitLab
+  command: gitlab-ctl restart
+
+- name: Copy GitLab configuration file.
+  template:
+    src: gitlab.rb.j2
+    dest: /etc/gitlab/gitlab.rb
+    owner: root
+    group: root
+    mode: 0600
+
+- name: (GITLAB-CE) Configure GitLab Community Edition
+  command: gitlab-ctl reconfigure
+
+- name: (GITLAB-CE) Restart GitLab after 2 step reconfigure
+  shell: 'sleep 30 && gitlab-ctl restart'
+
+- name: print initial pass to screen
+  shell: 'cat /etc/gitlab/initial_root_password | grep Password:'
+  register: details
+  tags: initial_pass1
+- set_fact: details="{{ details.stdout }}"
+  tags: initial_pass2
+- debug: var=details
+  tags: initial_pass3
+
+- name: get registration-token
+  shell: 'gitlab-rails runner -e production "puts Gitlab::CurrentSettings.current_application_settings.runners_registration_token"'
+  register: token
+  tags: token1
+- set_fact: token="{{ token.stdout }}"
+  tags: token2
+- debug: var=token
+  tags: token3

@@ -1,0 +1,34 @@
+---
+# minimum supported version: 0.15
+osarch: amd64
+exporter_user: exporter
+exporter_group: exporter
+bin_path: /usr/local/bin
+exporter_version: 0.18.1
+exporter_release_name: "node_exporter-{{ exporter_version }}.linux-{{ osarch }}"
+exporter_url: https://github.com/prometheus/node_exporter/releases/download/v{{ exporter_version }}/{{ exporter_release_name }}.tar.gz
+
+# https://github.com/prometheus/node_exporter#enabled-by-default
+exporter_enabled_collectors:
+    - conntrack
+    - cpu
+    - diskstats
+    - entropy
+    - filefd
+    - filesystem
+    - loadavg
+    - mdadm
+    - meminfo
+    - netdev
+    - netstat
+    - stat
+    - textfile
+    - time
+    - vmstat
+# https://github.com/prometheus/node_exporter#disabled-by-default
+exporter_disabled_collectors: []
+
+exporter_config_flags:
+  'web.listen-address': '0.0.0.0:9100'
+  'log.level': 'info'
+

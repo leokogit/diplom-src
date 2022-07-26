@@ -1,0 +1,16 @@
+[Unit]
+Description=Prometheus Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User={{ exporter_user }}
+Group={{ exporter_group }}
+ExecStart={{ bin_path }}/{{ exporter_release_name }}/node_exporter {% for collector in exporter_enabled_collectors %}--collector.{{ collector }} {% endfor %} {% for collector in exporter_disabled_collectors %}--no-collector.{{ collector }} {% endfor %} {% for flag, flag_value in exporter_config_flags.items() %}--{{ flag }}={{ flag_value }} {% endfor %}
+
+SyslogIdentifier=exporter
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
