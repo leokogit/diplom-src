@@ -22,7 +22,7 @@ terraform {
 
 #Vm yourdomain / 2vCPU, 2 RAM, External address (Public) и Internal address.
 resource "yandex_compute_instance" "vm1" {
-  name     = "${terraform.workspace}-ldevops-ru"
+  name     = "${terraform.workspace}-yourdomain-ru"
   hostname = "yourdomain"
   zone     = "ru-central1-a"
 
@@ -34,7 +34,7 @@ resource "yandex_compute_instance" "vm1" {
   boot_disk {
     initialize_params {
       image_id    = var.ubuntu
-      name        = "ubuntu20-ldevops"
+      name        = "ubuntu20-yourdomain"
       type        = "network-nvme"
       size        = "30"
     }
@@ -52,7 +52,7 @@ resource "yandex_compute_instance" "vm1" {
     ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
   }
 }
-#Vms "db01.yourdomain", "db02.ldevops.ru", "app.ldevops.ru", "gitlab.ldevops.ru", "runner.ldevops.ru", "monitoring.ldevops.ru/ external address.
+#Vms "db01.yourdomain", "db02.yourdomain.ru", "app.yourdomain.ru", "gitlab.yourdomain.ru", "runner.yourdomain.ru", "monitoring.yourdomain.ru/ external address.
 resource "yandex_compute_instance" "vms" {
   count    = local.instance_count[terraform.workspace]
   name     = "${terraform.workspace}-${var.names[count.index]}"
